@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+
+<!--It is a WebApplication, so it will be better to use server managed ConnectionPool rather than standAlone jdbc ConnectionPool-->
+<!--As we are using Tomcat Server, so first we have to enable ConnectionPooling in Tomcat Server -->
+<!-- When we configure Tomcat with Eclipse then Eclipse gets a copy of Tomcat Server and we have to enter ConnectionPooling
+details in this copy. We have to enter details of ConnectionPooling context.xml of Tomcat's "servers" folder located in  
+Project Explorer in Eclipse workspace-->
+<!-- We can copy ConnectionPooling details for specific Database from index.html file in /webapps/docs/ directory within
+     tomcat's installation folder -->
+<!-- In context.xml, we have to add resource details (i.e. details related to DB details & Connection pool  details)
+     <Context></Context> tag. After copying, do the necessary changes.-->
+     
+<!-- get DataSource from JNDI Registry & make it as spring bean-->
+<!-- in "jee" namespace, there is a tag <jee:jndi-lookup> that can be used for this purpose-->
+
+<jee:jndi-lookup id="ds" jndi-name="java:/comp/env/DsJndi"></jee:jndi-lookup> <!--prefix "java:/comp/env/" is fixed
+                     because Tomcat server will not keep its jdni objects in root folder, it will keep in deep in hierarchy.
+                            We will get DsJndi from context.xml file in "servers" folder-->
+
+<!--above tag internally uses jndi, contacts given jndi registry of given server, submit this jndi name, get the DataSource object 
+    & makes this object a spring bean having a bean id "ds". Later this "ds" can be injected to jdbcTemplate object as follows: -->
+
+<!-- Configuring jdbc Template -->
+<bean id="jt" class="org.springframework.jdbc.core.JdbcTemplate">
+	<constructor-arg ref="ds"/>
+</bean>
+
+<!-- Configuring DAO class with normal inner class-->
+<bean id="empDAO" class="com.nt.dao.EmployeeDAOImpl">
+	<constructor-arg ref="jt"/>
+</bean>
+
+<!-- Configuring DAO class with Anonymous inner class-->
+<!-- <bean id="empDAO" class="com.nt.dao.EmployeeDAOImpl1">
+	<constructor-arg ref="jt"/>
+</bean> -->
+
+<!-- Configuring DAO class with Lambda Expression-->
+<!-- <bean id="empDAO" class="com.nt.dao.EmployeeDAOImpl2">
+	<constructor-arg ref="jt"/>
+</bean> -->
+
+</beans>
